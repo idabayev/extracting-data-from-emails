@@ -371,5 +371,7 @@ if __name__ == '__main__':
     """
     Main program runs first the ID check, then the main function
     """
+    
+    # Enter a file name with the t.z.
     tz_dict = register_monthly_ids("MayHit.xlsx")
     main_function()
