@@ -1,4 +1,4 @@
-# for gmail API
+# For gmail API
 from __future__ import print_function
 import pickle
 import os.path
@@ -14,7 +14,8 @@ SCOPES = ['https://www.googleapis.com/auth/gmail.readonly']
 
 
 def list_messages_matching_query(service, user_id, query=''):
-    """List all Messages of the user's mailbox matching the query.
+    """
+    List all Messages of the user's mailbox matching the query.
 
     Args:
     service: Authorized Gmail API service instance.
@@ -30,7 +31,7 @@ def list_messages_matching_query(service, user_id, query=''):
     """
     try:
         response = service.users().messages().\
-            list(userId=user_id, maxResults=10, q=query).execute()
+            list(userId=user_id, maxResults=5, q=query).execute()
         messages = []
         if 'messages' in response:
             messages.extend(response['messages'])
@@ -47,16 +48,15 @@ def list_messages_matching_query(service, user_id, query=''):
         print('An error occurred: %s' % error)
 
 
-def get_attachments(service, user_id, msg_id, store_dir):
+def get_attachment_by_msg_id(service, user_id, msg_id, store_dir):
     """
-    Get and store attachment from Message with given id.
-
-    Args:
-    service: Authorized Gmail API service instance.
-    user_id: User's email address. The special value "me"
-    can be used to indicate the authenticated user.
-    msg_id: ID of Message containing attachment.
-    store_dir: The directory used to store attachments.
+    Get and store attachment from Message with given id, taken from gmail API's examples
+    :param service: Authorized Gmail API service instance.
+    :param user_id: User's email address. The special value "me" can be used to indicate
+            the authenticated user.
+    :param msg_id: ID of Message containing attachment.
+    :param store_dir: The directory used to store attachments.
+    :return:
     """
     try:
         message = service.users().messages().get(userId=user_id, id=msg_id).execute()
@@ -88,6 +88,7 @@ def get_attachments_from_messages(service, query, date_to_read_from, date_to_rea
     :param date_to_read_to: end date of messages
     :return:
     """
+    # define the query according to the input
     q = query
     q += " after:" + date_to_read_from
     if date_to_read_to != "":
@@ -96,20 +97,23 @@ def get_attachments_from_messages(service, query, date_to_read_from, date_to_rea
     messages = list_messages_matching_query(service, user_id='me', query=q)
 
     for msg in messages:
-        get_attachments(service, 'me', msg['id'], "Attachments\\")
+        get_attachment_by_msg_id(service, 'me', msg['id'], "Attachments\\")
 
 
 def downloading_recipet_pdfs(query, date_to_read_from, date_to_read_to=""):
     """
-    Shows basic usage of the Gmail API.
+    Connecting to gmail's API and calling the get_attachments function according to
+    the given input.
     """
     creds = None
+
     # The file token.pickle stores the user's access and refresh tokens, and is
     # created automatically when the authorization flow completes for the first
     # time.
     if os.path.exists('token.pickle'):
         with open('token.pickle', 'rb') as token:
             creds = pickle.load(token)
+
     # If there are no (valid) credentials available, let the user log in.
     if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
